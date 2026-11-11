@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUTAJAWWIZ LUGHOH — LIS 26-27</title>
+
+<!-- Tailwind CDN (gratis, tanpa build step) -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Google Fonts: Space Grotesk + Space Mono -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body class="min-h-screen">
+
+<!-- ================= HEADER ================= -->
+<header class="nb-stripes border-b-4 border-black h-8"></header>
+
+<div class="max-w-6xl mx-auto px-4 py-6">
+
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-4xl md:text-6xl uppercase">MUTAJAWWIZ LUGHOH LIS 26-27</h1>
+      <p class="mt-2 font-semibold text-gray-700">Language Improvement Section &mdash; Sistem Absensi Harian &amp; Log Ucapan.</p>
+    </div>
+    <div class="nb-card px-4 py-3 flex items-center gap-3">
+      <span id="status-dot" class="w-4 h-4 rounded-full bg-yellow-400 border-2 border-black"></span>
+      <span id="status-text" class="font-bold text-yellow-700">Menghubungkan…</span>
+      <button id="info-btn" class="nb-btn nb-btn-info" style="padding:0.35rem 0.8rem;font-size:0.8rem" title="Lihat informasi aplikasi">ℹ INFO</button>
+    </div>
+  </div>
+
+  <!-- ================= API URL SETTINGS ================= -->
+  <section class="nb-card p-5 mb-8 bg-blue-100">
+    <div class="flex flex-wrap items-center gap-3 mb-3">
+      <h2 class="font-extrabold uppercase text-sm tracking-wider">Koneksi Cloud</h2>
+      <span class="text-xs font-semibold text-gray-600">Sudah otomatis aktif — tidak perlu diapa-apakan</span>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <input type="text" id="api-url" class="nb-input flex-1 font-mono text-sm"
+             placeholder="/api (server cloud default)">
+      <button id="save-api" class="nb-btn nb-btn-primary">SIMPAN</button>
+      <button id="test-api" class="nb-btn nb-btn-info">TES</button>
+      <button id="clear-api" class="nb-btn nb-btn-danger">MODE LOKAL</button>
+    </div>
+    <p class="mt-2 text-xs font-semibold text-gray-600">
+      Data absensi &amp; ucapan tersimpan di <b>cloud</b> — aman walau ganti HP atau tutup browser.
+      Klik <b>MODE LOKAL</b> kalau mau data cuma di browser ini.
+    </p>
+  </section>
+
+  <!-- ================= PANEL ADMIN ================= -->
+  <section class="nb-card p-5 mb-8 bg-gray-100">
+    <div class="flex flex-wrap items-center gap-3 mb-3">
+      <h2 class="font-extrabold uppercase text-sm tracking-wider">Panel Admin</h2>
+      <span class="text-xs font-semibold text-gray-600">Butuh password untuk semua aksi</span>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <input type="password" id="admin-pass" class="nb-input flex-1" placeholder="Password admin" autocomplete="off">
+      <button id="admin-export" class="nb-btn nb-btn-info">UNDUH SEMUA DATA</button>
+      <button id="admin-clear" class="nb-btn nb-btn-danger">HAPUS SEMUA DATA</button>
+    </div>
+    <p class="mt-2 text-xs font-semibold text-gray-600">
+      <b>UNDUH SEMUA DATA</b> = ambil seluruh rekap (semua tanggal) jadi file CSV buat dibuka di Excel / dicadangkan ke Drive.
+      <b>HAPUS SEMUA DATA</b> = hapus permanen semua absensi di cloud.
+    </p>
+  </section>
+
+  <!-- ================= FORM ABSENSI ================= -->
+  <section class="grid lg:grid-cols-5 gap-8 mb-10">
+
+    <div class="lg:col-span-2">
+      <h2 class="nb-title mb-5">Form Absensi</h2>
+
+      <div class="nb-card p-6 space-y-5">
+
+        <!-- Search-as-you-type -->
+        <div>
+          <label class="nb-label" for="search-nama">1. Cari &amp; Pilih Nama</label>
+          <input type="text" id="search-nama" class="nb-input" autocomplete="off"
+                 placeholder="Ketik nama anggota..." list="nama-list">
+          <datalist id="nama-list"></datalist>
+          <p class="mt-2 text-xs font-semibold text-gray-600">Ketik sebagian nama untuk menyaring. Kelas &amp; kamar terisi otomatis.</p>
+        </div>
+
+        <!-- Kelas -->
+        <div>
+          <label class="nb-label" for="kelas">2. Kelas</label>
+          <input type="text" id="kelas" class="nb-input" readonly placeholder="Tingkat 1-4 (otomatis dari master)">
+        </div>
+
+        <!-- Kamar -->
+        <div>
+          <label class="nb-label" for="kamar">3. Kamar</label>
+          <input type="text" id="kamar" class="nb-input" readonly placeholder="Otomatis dari Master_Anggota">
+        </div>
+
+        <!-- Bahasa -->
+        <div>
+          <label class="nb-label" for="bahasa">4. Bahasa Ucapan</label>
+          <select id="bahasa" class="nb-select">
+            <option value="Indonesian">Indonesian</option>
+            <option value="Javanese">Javanese</option>
+          </select>
+        </div>
+
+        <!-- Ucapan -->
+        <div>
+          <label class="nb-label" for="ucapan">5. Teks Ucapan</label>
+          <textarea id="ucapan" class="nb-textarea" placeholder="Tulis ucapan manual di sini..."></textarea>
+        </div>
+
+        <!-- Pengabsen -->
+        <div>
+          <label class="nb-label" for="pengabsen">6. Language Improvement Section</label>
+          <input type="text" id="pengabsen" class="nb-input" value="LIS 26-27" placeholder="LIS 26-27">
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+          <button id="submit-btn" class="nb-btn nb-btn-primary flex-1">KIRIM ABSENSI</button>
+          <button id="reset-btn" class="nb-btn">RESET</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= REKAP / LOG ================= -->
+    <div class="lg:col-span-3">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <h2 class="nb-title">Rekap Harian</h2>
+        <span id="log-count" class="nb-chip bg-purple-300">0 entri</span>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="nb-card p-4 mb-4 bg-white">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div>
+            <label class="nb-label" for="filter-date">Filter Tanggal</label>
+            <input type="date" id="filter-date" class="nb-input">
+          </div>
+          <div>
+            <label class="nb-label" for="filter-kelas">Filter Kelas</label>
+            <select id="filter-kelas" class="nb-select">
+              <option value="">Semua Kelas</option>
+            </select>
+          </div>
+          <div>
+            <label class="nb-label" for="filter-bahasa">Filter Bahasa</label>
+            <select id="filter-bahasa" class="nb-select">
+              <option value="">Semua Bahasa</option>
+              <option value="Indonesian">Indonesian</option>
+              <option value="Javanese">Javanese</option>
+            </select>
+          </div>
+          <div>
+            <label class="nb-label" for="filter-nama">Cari Nama</label>
+            <input type="text" id="filter-nama" class="nb-input" placeholder=" ketik nama..." autocomplete="off">
+          </div>
+          <div class="flex items-end">
+            <button id="refresh-log" class="nb-btn nb-btn-info w-full">REFRESH</button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 mt-3">
+          <label class="flex items-center gap-2 font-bold text-sm cursor-pointer select-none">
+            <input type="checkbox" id="only-dup" class="w-5 h-5 border-2 border-black accent-black">
+            Hanya yang absen kelipatan (&gt;1x)
+          </label>
+          <button id="export-csv" class="nb-btn nb-btn-success">EXPORT CSV</button>
+        </div>
+
+        <p class="mt-3 text-xs font-semibold text-gray-600">
+          Filter bisa dipakai barengan: tanggal + kelas (tingkat 1-4) + bahasa + cari nama + kelipatan.
+        </p>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div class="nb-card p-4 bg-yellow-200 text-center">
+          <div class="text-3xl font-extrabold" id="stat-total">0</div>
+          <div class="text-xs font-bold uppercase tracking-wide">Total Absen</div>
+        </div>
+        <div class="nb-card p-4 bg-green-200 text-center">
+          <div class="text-3xl font-extrabold" id="stat-unique">0</div>
+          <div class="text-xs font-bold uppercase tracking-wide">Anggota Unik</div>
+        </div>
+        <div class="nb-card p-4 bg-orange-200 text-center">
+          <div class="text-3xl font-extrabold" id="stat-dup">0</div>
+          <div class="text-xs font-bold uppercase tracking-wide">Kelipatan</div>
+        </div>
+        <div class="nb-card p-4 bg-pink-200 text-center">
+          <div class="text-3xl font-extrabold" id="stat-class">0</div>
+          <div class="text-xs font-bold uppercase tracking-wide">Kelas</div>
+        </div>
+      </div>
+
+      <!-- Table (desktop) -->
+      <div class="nb-table-wrap hidden md:block">
+        <table class="nb-table">
+          <thead>
+            <tr>
+              <th>ID Log</th>
+              <th>Timestamp</th>
+              <th>Nama</th>
+              <th>Kelas</th>
+              <th>Kamar</th>
+              <th>Bahasa</th>
+              <th>Ucapan</th>
+            </tr>
+          </thead>
+          <tbody id="log-table"></tbody>
+        </table>
+      </div>
+
+      <!-- Cards (mobile) -->
+      <div id="log-cards" class="md:hidden space-y-3"></div>
+
+    </div>
+  </section>
+
+  <!-- ================= CARA PAKAI ================= -->
+  <section class="nb-card p-6 mb-10 bg-yellow-100">
+    <h2 class="font-extrabold uppercase text-xl mb-4">Cara Pakai</h2>
+    <ol class="space-y-2 font-semibold list-decimal list-inside">
+      <li>Pastikan status di panel atas berwarna <b>hijau (Terhubung)</b> sebelum menginput data.</li>
+      <li>Ketik nama anggota → kelas &amp; kamar terisi otomatis.</li>
+      <li>Pilih bahasa → tulis ucapan → klik <b>KIRIM ABSENSI</b>.</li>
+      <li>Data langsung masuk <b>cloud</b> — bisa dibuka dari HP/laptop lain, tidak hilang walau browser ditutup.</li>
+      <li>Rekap bisa difilter per <b>tanggal</b>, <b>kelas</b> (tingkat 1/2/3/4), <b>bahasa</b>, <b>cari nama</b>, atau centang <b>kelipatan</b>.</li>
+      <li>Klik <b>EXPORT CSV</b> buat download rekap yang sedang tampil, atau pakai panel <b>Export Excel (XLSX)</b> di bawah untuk file Excel rapi.</li>
+    </ol>
+  </section>
+
+  <!-- ================= EXPORT XLSX (PANEL BARU) ================= -->
+  <section class="nb-card p-6 mb-10 bg-green-100" id="panel-xlsx">
+    <div class="flex flex-wrap items-center gap-3 mb-2">
+      <h2 class="font-extrabold uppercase text-xl">Export Excel (XLSX)</h2>
+      <span class="nb-chip bg-white">Format rapi · 1 sheet per tanggal</span>
+    </div>
+    <p class="text-sm font-semibold text-gray-700 mb-4">
+      Unduh rekap absensi dalam file Excel yang sudah diformat sesuai template resmi
+      (header berwarna, garis tabel, satu sheet untuk tiap tanggal).
+      Semua filter bisa dipakai: <b>rentang tanggal</b>, <b>kelas</b>, <b>bahasa</b>, dan <b>kelipatan</b>.
+    </p>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+      <div>
+        <label class="nb-label" for="xlsx-from">Dari Tanggal</label>
+        <input type="date" id="xlsx-from" class="nb-input">
+      </div>
+      <div>
+        <label class="nb-label" for="xlsx-to">Sampai Tanggal</label>
+        <input type="date" id="xlsx-to" class="nb-input">
+      </div>
+      <div>
+        <label class="nb-label" for="xlsx-kelas">Filter Kelas</label>
+        <select id="xlsx-kelas" class="nb-select">
+          <option value="">Semua Kelas</option>
+        </select>
+      </div>
+      <div>
+        <label class="nb-label" for="xlsx-bahasa">Filter Bahasa</label>
+        <select id="xlsx-bahasa" class="nb-select">
+          <option value="">Semua Bahasa</option>
+          <option value="Indonesian">Indonesian</option>
+          <option value="Javanese">Javanese</option>
+        </select>
+      </div>
+      <div>
+        <label class="nb-label" for="xlsx-nama">Cari Nama</label>
+        <input type="text" id="xlsx-nama" class="nb-input" placeholder=" ketik nama..." autocomplete="off">
+      </div>
+      <div>
+        <label class="nb-label" for="xlsx-pass">Password Admin <span class="font-normal text-xs">(khusus mode semua tanggal)</span></label>
+        <input type="password" id="xlsx-pass" class="nb-input" placeholder="Password admin" autocomplete="off">
+      </div>
+      <div class="flex flex-col justify-end gap-2">
+        <label class="flex items-center gap-2 font-bold text-sm cursor-pointer select-none">
+          <input type="checkbox" id="xlsx-all" class="w-5 h-5 border-2 border-black accent-black">
+          SEMUA TANGGAL (pakai password)
+        </label>
+        <label class="flex items-center gap-2 font-bold text-sm cursor-pointer select-none">
+          <input type="checkbox" id="xlsx-dup" class="w-5 h-5 border-2 border-black accent-black">
+          Hanya kelipatan (&gt;1x / hari)
+        </label>
+      </div>
+    </div>
+
+    <button id="xlsx-download" class="nb-btn nb-btn-success w-full sm:w-auto">UNDUH XLSX</button>
+
+    <p class="mt-3 text-xs font-semibold text-gray-600">
+      Kolom <b>Group</b> terisi otomatis sesuai template resmi:
+      <b>Extreme</b> untuk ucapan <b>Javanese Language</b>, <b>Medium</b> untuk <b>Indonesian Language</b>.
+      Kolom <b>Speaking</b> ditulis penuh (<i>Indonesian Language</i> / <i>Javanese Language</i>),
+      kolom <b>Room</b> memakai nomor kamar, dan kolom <b>Class</b> memakai tingkat kelas
+      (1/2/3/4) sesuai template resmi.
+    </p>
+  </section>
+
+  <footer class="text-center font-bold text-xs uppercase tracking-widest text-gray-600 py-8 border-t-4 border-black">
+    <div>Mutajawwiz Lughoh &mdash; Language Improvement Section 26/27</div>
+    <div class="mt-2 text-[10px] normal-case tracking-wide opacity-70">Developer: Ellerick Darren Lestyono</div>
+  </footer>
+
+</div>
+
+<!-- ================= POPUP INFO (muncul saat awal buka web) ================= -->
+<div id="info-popup" class="nb-overlay" hidden>
+  <div class="nb-card nb-pop bg-white w-full max-w-lg p-6" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+    <h2 id="popup-title" class="text-2xl font-extrabold uppercase mb-3 pb-2 border-b-4 border-black">Informasi Aplikasi</h2>
+
+    <div class="space-y-3 font-semibold text-sm leading-relaxed">
+      <p>
+        Selamat datang di <b>MUTAJAWWIZ LUGHOH &mdash; LIS 26-27</b>.
+        Aplikasi absensi &amp; log ucapan ini dibuat oleh <b>Ellerick Darren Lestyono</b>
+        untuk <b>Language Improvement Section</b>, dan diwariskan untuk generasi-generasi berikutnya.
+      </p>
+
+      <p class="bg-yellow-200 border-3 border-black p-3" style="border-width:3px">
+        <b>Penting:</b> sebelum menginput data, pastikan status di panel atas sudah
+        <b>TERHUBUNG</b> (titik hijau). Kalau statusnya belum terhubung, data yang diinput
+        bisa <b>tidak tersimpan</b> ke cloud.
+      </p>
+
+      <p>
+        Jika ada kendala, error, atau data yang terasa tidak masuk, silakan hubungi developer:
+        <b>Ellerick Darren Lestyono</b>.
+      </p>
+    </div>
+
+    <button id="popup-close" class="nb-btn nb-btn-primary w-full mt-5">SAYA MENGERTI</button>
+  </div>
+</div>
+
+<!-- ================= TOAST ================= -->
+<div id="toast" class="nb-toast hidden bg-green-400">
+  <span id="toast-msg"></span>
+</div>
+
+<script src="js/master-data.js?v=3"></script>
+<script src="js/xlsx-writer.js?v=3"></script>
+<script src="js/script.js?v=3"></script>
+<script src="js/app.js?v=3"></script>
+</body>
+</html>

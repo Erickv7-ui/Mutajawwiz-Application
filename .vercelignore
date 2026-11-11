@@ -1,0 +1,13 @@
+# Exclude backend-only files from Vercel static deployment
+Code.gs
+MasterData.gs
+Master_Anggota.csv
+README.md
+PANDAH_TAHAP_1.md
+*.csv
+*.docx
+Code_RINGKAS.gs
+APPS_SCRIPT_GABUNGAN.gs
+.env.local
+.env*.local
+node_modules
